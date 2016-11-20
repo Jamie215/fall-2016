@@ -26,9 +26,6 @@ bool radioNumber = 0;
 RF24 radio(7,8);
 /**********************************************************/
 
-QueueList <unsigned long> runVal;
-const unsigned long DELAY_CONST = 1;
-const unsigned long THRESHOLD = 1830; // delay-distance threshold (set to 2000);
 const int alertLED = 9;
 //const int alertSpeaker = 4;
 // dnd: Do Not Disturb mode
@@ -79,8 +76,7 @@ void loop() {
       while (radio.available()) {                                   // While there is data ready
         radio.read( &got_time, sizeof(unsigned long) );
         radio.read( &text, sizeof(char) );             // Get the payload
-        if (got_time == 26984)
-        {
+        if (got_time == 26984){
           Serial.println("Out of range!!!");
           digitalWrite(alertLED, HIGH);
         }
@@ -88,32 +84,11 @@ void loop() {
       
       digitalWrite(alertLED, LOW);
       radio.stopListening();                                        // First, stop listening so we can talk   
-      radio.write( &text, sizeof(char) );              // Send the final one back.      
+      radio.write(&text, sizeof(char));              // Send the final one back.      
       radio.startListening();                                       // Now, resume listening so we catch the next packets.     
-      Serial.print(F("Sent response "));
+      Serial.print(F("Sent response"));
       Serial.println(got_time);  
    }
  }
-
-
-/****************** Change Roles via Serial Commands ***************************/
-
-  if ( Serial.available() )
-  {
-    char c = toupper(Serial.read());
-    if ( c == 'T' && role == 0 ){      
-      Serial.println(F("*** CHANGING TO TRANSMIT ROLE -- PRESS 'R' TO SWITCH BACK"));
-      role = 1;                  // Become the primary transmitter (ping out)
-    
-   }else
-    if ( c == 'R' && role == 1 ){
-      Serial.println(F("*** CHANGING TO RECEIVE ROLE -- PRESS 'T' TO SWITCH BACK"));      
-       role = 0;                // Become the primary receiver (pong back)
-       radio.startListening();
-       
-    }
-  }
-
-
 } // Loop
 
